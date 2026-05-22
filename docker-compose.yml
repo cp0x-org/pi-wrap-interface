@@ -1,0 +1,8 @@
+services:
+  pi-unwrap-interface:
+    image: cp0x/pi-unwrap-interface:0.1.0
+    restart: unless-stopped
+    ports:
+      - "4173:4173"
+    volumes:
+      - ./public/config.js:/app/dist/config.js:ro

@@ -1,0 +1,44 @@
+@use 'themes-vars.module.scss' as *;
+@use './scrollbar.scss';
+
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.scrollbar-container {
+  .ps__rail-y {
+    &:hover > .ps__thumb-y,
+    &:focus > .ps__thumb-y,
+    &.ps--clicking > .ps__thumb-y {
+      background-color: $grey500;
+      width: 5px;
+    }
+  }
+
+  .ps__thumb-y {
+    background-color: $grey500;
+    border-radius: 6px;
+    right: 0;
+    width: 5px;
+  }
+}
+
+.notistack-Snackbar {
+  .notistack-MuiContent-warning {
+    background-color: $warningMain;
+    color: $grey900;
+  }
+
+  .notistack-MuiContent-success {
+    background-color: $successMain;
+    color: $grey900;
+  }
+
+  .notistack-MuiContent-error {
+    background-color: $errorMain;
+  }
+
+  .notistack-MuiContent-info {
+    background-color: #0288d1;
+  }
+}

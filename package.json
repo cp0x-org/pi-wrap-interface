@@ -1,0 +1,79 @@
+{
+  "name": "unwrap-interface",
+  "version": "4.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.6.2",
+  "dependencies": {
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.0",
+    "@fontsource/roboto": "5.2.5",
+    "@mui/material": "7.0.2",
+    "@rainbow-me/rainbowkit": "^2.2.5",
+    "@tanstack/react-query": "^5.24.1",
+    "@tabler/icons-react": "3.31.0",
+    "@mui/icons-material": "7.0.2",
+    "buffer": "^6.0.3",
+    "notistack": "3.0.2",
+    "react-intl": "7.1.11",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-router-dom": "7.5.2",
+    "viem": "^2.50.4",
+    "vite": "6.3.3",
+    "wagmi": "^2.15.3",
+    "web-vitals": "4.2.4",
+    "swr": "2.3.3",
+    "axios": "1.9.0"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "build-stage": "env-cmd -f .env.qa vite build",
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
+    "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
+    "knip": "knip"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/compat": "1.2.8",
+    "@eslint/eslintrc": "3.3.1",
+    "@eslint/js": "9.25.1",
+    "@types/jest": "29.5.14",
+    "@types/node": "22.15.2",
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2",
+    "@typescript-eslint/eslint-plugin": "8.31.0",
+    "@typescript-eslint/parser": "8.31.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "env-cmd": "10.1.0",
+    "eslint": "9.25.1",
+    "eslint-config-prettier": "10.1.2",
+    "eslint-plugin-prettier": "5.2.6",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "knip": "5.50.5",
+    "prettier": "3.5.3",
+    "sass": "1.87.0",
+    "typescript": "5.8.3",
+    "vite-plugin-svgr": "^4.3.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
