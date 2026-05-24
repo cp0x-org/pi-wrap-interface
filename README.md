@@ -1,6 +1,6 @@
 # Permissionless wrap Interface by cp0x
 
-An open-source interface for the wrap functional designed to be fully permissionless and enable direct, unrestricted interaction with smart contracts.
+An open-source interface for the token wrap/unwrap functional for different chains designed to be fully permissionless and enable direct, unrestricted interaction with smart contracts.
 
 ## Application Links
 - Website: [wrap.cp0x.com](https://wrap.cp0x.com/)

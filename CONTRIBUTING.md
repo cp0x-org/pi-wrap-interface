@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to the Permissionless Unwrap interface!
+Thank you for your interest in contributing to the Permissionless Wrap interface!
 
 # Development
 
