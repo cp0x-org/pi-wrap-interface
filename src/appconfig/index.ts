@@ -44,7 +44,7 @@ export const wrappedNativeTokenConfig = {
     chainName: 'Polygon',
     nativeSymbol: 'POL',
     wrappedSymbol: 'WPOL',
-    wrappedAddress: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270'
+    wrappedAddress: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'
   },
   [unichain.id]: {
     chainId: unichain.id,

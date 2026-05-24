@@ -1,33 +1,133 @@
 import { useState } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Typography } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-const FAQ_ITEMS = [
+const NETWORKS = [
+  {
+    name: 'Ethereum',
+    native: 'ETH',
+    wrapped: 'WETH',
+    desc: 'The original smart contract platform and DeFi hub. WETH is the standard ERC-20 used across all major protocols.'
+  },
+  {
+    name: 'Base',
+    native: 'ETH',
+    wrapped: 'WETH',
+    desc: "Coinbase's OP Stack L2 — low fees, fast finality, growing DeFi ecosystem."
+  },
+  {
+    name: 'Arbitrum',
+    native: 'ETH',
+    wrapped: 'WETH',
+    desc: 'Leading Ethereum L2 with Nitro rollup technology. Home to Uniswap, GMX, and hundreds of DeFi protocols.'
+  },
+  {
+    name: 'Optimism',
+    native: 'ETH',
+    wrapped: 'WETH',
+    desc: 'OP Stack L2 with EVM equivalence. Powers Velodrome, Synthetix, and the Superchain ecosystem.'
+  },
+  {
+    name: 'Polygon',
+    native: 'POL',
+    wrapped: 'WPOL',
+    desc: 'High-throughput EVM sidechain. POL is the native gas token; WPOL unlocks it for ERC-20 DeFi use.'
+  },
+  {
+    name: 'Unichain',
+    native: 'ETH',
+    wrapped: 'WETH',
+    desc: "Uniswap Labs' own OP Stack L2, optimized for on-chain trading and liquidity."
+  },
+  {
+    name: 'HyperEVM',
+    native: 'HYPE',
+    wrapped: 'WHYPE',
+    desc: "Hyperliquid's EVM environment. HYPE is the native token; WHYPE makes it composable with ERC-20 DeFi."
+  },
+  {
+    name: 'MegaETH',
+    native: 'ETH',
+    wrapped: 'WETH',
+    desc: 'Ultra-high-throughput EVM L2 targeting 100k+ TPS for real-time on-chain applications.'
+  }
+];
+
+function NetworkList() {
+  const theme = useTheme();
+  return (
+    <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      {NETWORKS.map((n) => (
+        <Box
+          key={n.name}
+          component="li"
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 0.25,
+            borderLeft: `2px solid ${alpha(theme.palette.primary.main, 0.35)}`,
+            pl: 1.5
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <Typography component="span" sx={{ fontWeight: 700, fontSize: '0.95rem' }}>
+              {n.name}
+            </Typography>
+            <Chip
+              label={`${n.native} → ${n.wrapped}`}
+              size="small"
+              sx={{ fontSize: '0.7rem', height: 20, fontFamily: 'monospace' }}
+            />
+          </Box>
+          <Typography sx={{ fontSize: '0.875rem' }} color="text.secondary">
+            {n.desc}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+type FaqItem = {
+  question: string;
+  answer: string | React.ReactNode;
+};
+
+const FAQ_ITEMS: FaqItem[] = [
   {
     question: 'What is token wrapping?',
     answer:
-      'Wrapping converts a native blockchain coin (ETH, POL) into an ERC-20 token (WETH, WPOL). Most DeFi protocols — DEXs, lending platforms, yield farms — only work with ERC-20 tokens. Wrapping lets you use native coins in any ERC-20-compatible protocol at a 1:1 ratio.'
+      'Wrapping converts a native blockchain coin (ETH, POL, HYPE) into an ERC-20 token (WETH, WPOL, WHYPE). Most DeFi protocols — DEXs, lending platforms, yield farms — only work with ERC-20 tokens. Wrapping lets you use native coins in any ERC-20-compatible protocol at a 1:1 ratio with no fee and no counterparty risk.'
   },
   {
     question: 'What is WETH (Wrapped Ether)?',
     answer:
-      'WETH is an ERC-20 token pegged 1:1 to ETH. Deposit ETH into the WETH contract and receive WETH in return. Redeem it back at any time at a 1:1 rate. Used by Uniswap, Aave, Compound, and virtually every major DeFi protocol.'
+      'WETH is an ERC-20 token pegged 1:1 to ETH. Deposit ETH into the WETH contract and receive WETH in return; redeem it back at any time at the same 1:1 rate. WETH is supported on Ethereum, Base, Arbitrum, Optimism, Unichain, and MegaETH — wherever ETH is the native gas token.'
   },
   {
-    question: 'Which networks are supported?',
+    question: 'What is WPOL (Wrapped POL)?',
     answer:
-      'Ethereum (ETH ↔ WETH), Base (ETH ↔ WETH), Arbitrum (ETH ↔ WETH), Optimism (ETH ↔ WETH), Polygon (POL ↔ WPOL), and Unichain (ETH ↔ WETH).'
+      'WPOL is the ERC-20 version of POL, the native gas token of the Polygon network. Wrapping POL into WPOL lets you use it in Polygon DeFi protocols such as QuickSwap, Aave, and Balancer that require ERC-20 tokens. Unwrap back to POL at any time at 1:1.'
+  },
+  {
+    question: 'What is WHYPE (Wrapped HYPE)?',
+    answer:
+      'WHYPE is the ERC-20 version of HYPE, the native token of Hyperliquid\'s HyperEVM chain. Wrapping HYPE into WHYPE makes it composable with EVM DeFi protocols that require the ERC-20 standard. Unwrap back to HYPE at any time at 1:1.'
+  },
+  {
+    question: 'Which networks and tokens are supported?',
+    answer: <NetworkList />
   },
   {
     question: 'Is there a fee?',
     answer:
-      'No protocol fee — you receive exactly 1 WETH per 1 ETH wrapped (and vice versa). You only pay the standard network gas fee, which varies by chain and congestion.'
+      'No protocol fee — you receive exactly 1 wrapped token per 1 native coin (and vice versa). You only pay the standard network gas fee, which varies by chain and congestion.'
   },
   {
     question: 'Is it safe? Is it non-custodial?',
     answer:
-      'Yes. This interface calls the canonical WETH/WPOL smart contracts directly. It is fully permissionless and non-custodial — your funds never leave your wallet until you sign a transaction.'
+      'Yes. This interface calls the canonical WETH / WPOL / WHYPE smart contracts directly. It is fully permissionless and non-custodial — your funds never leave your wallet until you sign a transaction. No approvals, no intermediaries.'
   }
 ];
 
@@ -74,9 +174,13 @@ export function WrapFaq() {
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ px: 0, pt: 0, pb: 2 }}>
-            <Typography sx={{ fontSize: '1rem' }} color="text.secondary">
-              {item.answer}
-            </Typography>
+            {typeof item.answer === 'string' ? (
+              <Typography sx={{ fontSize: '1rem' }} color="text.secondary">
+                {item.answer}
+              </Typography>
+            ) : (
+              item.answer
+            )}
           </AccordionDetails>
         </Accordion>
       ))}
