@@ -17,6 +17,18 @@ const NETWORKS = [
     desc: "Coinbase's OP Stack L2 — low fees, fast finality, growing DeFi ecosystem."
   },
   {
+    name: 'HyperEVM',
+    native: 'HYPE',
+    wrapped: 'WHYPE',
+    desc: "Hyperliquid's EVM environment. HYPE is the native token; WHYPE makes it composable with ERC-20 DeFi."
+  },
+  {
+    name: 'MegaETH',
+    native: 'ETH',
+    wrapped: 'WETH',
+    desc: 'Ultra-high-throughput EVM L2 targeting 100k+ TPS for real-time on-chain applications.'
+  },
+  {
     name: 'Arbitrum',
     native: 'ETH',
     wrapped: 'WETH',
@@ -40,18 +52,6 @@ const NETWORKS = [
     wrapped: 'WETH',
     desc: "Uniswap Labs' own OP Stack L2, optimized for on-chain trading and liquidity."
   },
-  {
-    name: 'HyperEVM',
-    native: 'HYPE',
-    wrapped: 'WHYPE',
-    desc: "Hyperliquid's EVM environment. HYPE is the native token; WHYPE makes it composable with ERC-20 DeFi."
-  },
-  {
-    name: 'MegaETH',
-    native: 'ETH',
-    wrapped: 'WETH',
-    desc: 'Ultra-high-throughput EVM L2 targeting 100k+ TPS for real-time on-chain applications.'
-  }
 ];
 
 function NetworkList() {

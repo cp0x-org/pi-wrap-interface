@@ -71,4 +71,15 @@ export const wrappedNativeTokenConfig = {
 
 export type WrappedNativeChainId = keyof typeof wrappedNativeTokenConfig;
 
-export const wrappedNativeChains = Object.values(wrappedNativeTokenConfig);
+const chainDisplayOrder: WrappedNativeChainId[] = [
+  mainnet.id,
+  base.id,
+  hyperEvm.id,
+  megaeth.id,
+  arbitrum.id,
+  optimism.id,
+  polygon.id,
+  unichain.id,
+];
+
+export const wrappedNativeChains = chainDisplayOrder.map((id) => wrappedNativeTokenConfig[id]);

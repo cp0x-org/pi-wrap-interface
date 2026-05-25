@@ -1,6 +1,6 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { ReactComponent as Cp0xLogo } from '@/assets/images/cp0x-logo.svg';
-import unwrapLogo from '@/assets/images/unwrap-logo.png';
+import unwrapLogo from '@/assets/images/wrap-logo.png';
 import Link from '@mui/material/Link';
 
 import { DASHBOARD_PATH } from 'config';
