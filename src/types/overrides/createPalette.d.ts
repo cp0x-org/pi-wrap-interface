@@ -1,6 +1,13 @@
 import '@mui/material/styles';
 
-declare module '@mui/material/styles/createPalette' {
+// NOTE: this augmentation must target '@mui/material/styles', not
+// '@mui/material/styles/createPalette'. Since MUI v6 the package `exports` map only
+// resolves '@mui/material/<dir>' (-> <dir>/index.d.ts), so the deeper specifier does not
+// resolve; TypeScript then treats `declare module` as a *new* ambient module instead of an
+// augmentation and the extra palette keys silently never reach MUI's real interfaces.
+// '@mui/material/styles' re-exports Palette, PaletteColor, PaletteOptions and TypeText,
+// so declaring them here merges with the originals.
+declare module '@mui/material/styles' {
   interface PaletteColor {
     100: string;
     200: string;
@@ -21,11 +28,10 @@ declare module '@mui/material/styles/createPalette' {
   interface PaletteOptions {
     orange?: PaletteColorOptions;
     dark?: PaletteColorOptions;
-    icon?: IconPaletteColorOptions;
   }
+
   interface Palette {
     orange: PaletteColor;
     dark: PaletteColor;
-    icon: IconPaletteColor;
   }
 }

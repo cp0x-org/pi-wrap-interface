@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useIntl } from 'react-intl';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import {
   Alert,
@@ -33,6 +34,21 @@ type Mode = 'wrap' | 'unwrap';
 const DEFAULT_CHAIN_ID = wrappedNativeChains[0].chainId as WrappedNativeChainId;
 const amountPattern = /^\d*(?:[.,]\d*)?$/;
 
+// stable ids used to wire accessible names/descriptions in the AX tree
+const ID = {
+  heading: 'wrap-heading',
+  rateNote: 'wrap-rate-note',
+  networkWarning: 'wrap-network-warning',
+  txStatus: 'wrap-tx-status',
+  txError: 'wrap-tx-error',
+  fromLabel: 'wrap-from-label',
+  fromSymbol: 'wrap-from-symbol',
+  fromBalance: 'wrap-from-balance',
+  toLabel: 'wrap-to-label',
+  toSymbol: 'wrap-to-symbol',
+  toBalance: 'wrap-to-balance'
+} as const;
+
 const normalizeAmount = (value: string) => value.replace(',', '.');
 
 const formatBalance = (value?: bigint) => {
@@ -61,6 +77,7 @@ const parseAmount = (value: string) => {
 
 export default function WrapPage() {
   const theme = useTheme();
+  const intl = useIntl();
   const { address, isConnected } = useAccount();
   const walletChainId = useChainId();
   const { switchChainAsync, isPending: isSwitchingChain } = useSwitchChain();
@@ -123,7 +140,7 @@ export default function WrapPage() {
 
   useEffect(() => {
     if (txState === 'confirmed') {
-      dispatchSuccess(`${mode === 'wrap' ? 'Wrap' : 'Unwrap'} completed`);
+      dispatchSuccess(intl.formatMessage({ id: mode === 'wrap' ? 'tx.completed.wrap' : 'tx.completed.unwrap' }));
       setAmount('');
       refetchNativeBalance();
       refetchWrappedBalance();
@@ -131,9 +148,9 @@ export default function WrapPage() {
     }
 
     if (txState === 'error') {
-      dispatchError(parseError(txError, 'Transaction failed'));
+      dispatchError(parseError(txError, intl.formatMessage({ id: 'tx.failed' })));
     }
-  }, [mode, refetchNativeBalance, refetchWrappedBalance, resetTx, txError, txState]);
+  }, [intl, mode, refetchNativeBalance, refetchWrappedBalance, resetTx, txError, txState]);
 
   const handleNetworkChange = useCallback(
     async (event: SelectChangeEvent<number>) => {
@@ -150,10 +167,10 @@ export default function WrapPage() {
         await switchChainAsync({ chainId: nextChainId });
       } catch (error) {
         setSelectedChainId(previousChainId);
-        dispatchError(parseError(error, 'Failed to switch network'));
+        dispatchError(parseError(error, intl.formatMessage({ id: 'tx.switchNetworkFailed' })));
       }
     },
-    [isConnected, resetTx, selectedChainId, switchChainAsync, walletChainId]
+    [intl, isConnected, resetTx, selectedChainId, switchChainAsync, walletChainId]
   );
 
   const handleSwap = () => {
@@ -186,7 +203,7 @@ export default function WrapPage() {
       try {
         await switchChainAsync({ chainId: selectedChainId });
       } catch (error) {
-        dispatchError(parseError(error, 'Failed to switch network'));
+        dispatchError(parseError(error, intl.formatMessage({ id: 'tx.switchNetworkFailed' })));
       }
       return;
     }
@@ -208,23 +225,32 @@ export default function WrapPage() {
     }
   };
 
-  const actionLabel = useMemo(() => {
-    if (!isConnected) return 'Connect Wallet';
-    if (!walletChainSupported) return 'Unsupported wallet network';
-    if (!isWalletOnSelectedChain) return `Switch to ${selectedChain.chainName}`;
-    if (!amount) return mode === 'wrap' ? 'Enter amount to wrap' : 'Enter amount to unwrap';
-    if (!hasAmount) return 'Enter valid amount';
-    if (hasInsufficientBalance) return `Insufficient ${fromSymbol} balance`;
-    if (isSwitchingChain) return 'Switching network...';
-    if (isTxBusy) return mode === 'wrap' ? 'Wrapping...' : 'Unwrapping...';
-    if (txState === 'error') return 'Try again';
+  // The panel is marked up as a <form> purely for semantics/landmarks. Submission
+  // stays driven by the action button's onClick, so implicit submission is a no-op.
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
 
-    return mode === 'wrap' ? 'Wrap' : 'Unwrap';
+  const actionLabel = useMemo(() => {
+    const t = (id: string, values?: Record<string, string>) => intl.formatMessage({ id }, values);
+
+    if (!isConnected) return t('wallet.connect');
+    if (!walletChainSupported) return t('wrap.action.unsupportedNetwork');
+    if (!isWalletOnSelectedChain) return t('wrap.action.switchTo', { chain: selectedChain.chainName });
+    if (!amount) return t(mode === 'wrap' ? 'wrap.action.enterAmount.wrap' : 'wrap.action.enterAmount.unwrap');
+    if (!hasAmount) return t('wrap.action.invalidAmount');
+    if (hasInsufficientBalance) return t('wrap.action.insufficientBalance', { symbol: fromSymbol });
+    if (isSwitchingChain) return t('wrap.action.switchingNetwork');
+    if (isTxBusy) return t(mode === 'wrap' ? 'wrap.action.wrapping' : 'wrap.action.unwrapping');
+    if (txState === 'error') return t('wrap.action.retry');
+
+    return t(mode === 'wrap' ? 'wrap.action.wrap' : 'wrap.action.unwrap');
   }, [
     amount,
     fromSymbol,
     hasAmount,
     hasInsufficientBalance,
+    intl,
     isConnected,
     isSwitchingChain,
     isTxBusy,
@@ -234,6 +260,56 @@ export default function WrapPage() {
     txState,
     walletChainSupported
   ]);
+
+  // Longer, context-rich name for AT/agents. Returns undefined when the visible
+  // label is already unambiguous, so the visible text stays the accessible name.
+  const actionAriaLabel = useMemo(() => {
+    if (!isConnected || !walletChainSupported) return undefined;
+
+    const chain = selectedChain.chainName;
+    const t = (id: string, values?: Record<string, string>) => intl.formatMessage({ id }, values);
+
+    if (!isWalletOnSelectedChain) return t('wrap.action.aria.switchTo', { chain });
+    if (!amount)
+      return t(mode === 'wrap' ? 'wrap.action.aria.enterAmount.wrap' : 'wrap.action.aria.enterAmount.unwrap', {
+        from: fromSymbol,
+        to: toSymbol,
+        chain
+      });
+    if (!hasAmount || hasInsufficientBalance || isSwitchingChain) return undefined;
+
+    const operation = { amount: normalizeAmount(amount), from: fromSymbol, to: toSymbol, chain };
+
+    if (isTxBusy) return t(mode === 'wrap' ? 'wrap.action.aria.wrapping' : 'wrap.action.aria.unwrapping', operation);
+    if (txState === 'error') return t(mode === 'wrap' ? 'wrap.action.aria.retry.wrap' : 'wrap.action.aria.retry.unwrap', operation);
+
+    return t(mode === 'wrap' ? 'wrap.action.aria.wrap' : 'wrap.action.aria.unwrap', operation);
+  }, [
+    amount,
+    fromSymbol,
+    hasAmount,
+    hasInsufficientBalance,
+    intl,
+    isConnected,
+    isSwitchingChain,
+    isTxBusy,
+    isWalletOnSelectedChain,
+    mode,
+    selectedChain.chainName,
+    toSymbol,
+    txState,
+    walletChainSupported
+  ]);
+
+  const actionDescribedBy =
+    [
+      isConnected && !walletChainSupported ? ID.networkWarning : null,
+      txState === 'submitted' ? ID.txStatus : null,
+      txState === 'error' ? ID.txError : null,
+      ID.rateNote
+    ]
+      .filter(Boolean)
+      .join(' ') || undefined;
 
   const isActionDisabled =
     isConnected &&
@@ -266,15 +342,28 @@ export default function WrapPage() {
           boxShadow: `0 24px 80px ${alpha(theme.palette.common.black, 0.16)}`
         }}
       >
-        <Stack spacing={2}>
+        <Stack
+          component="form"
+          spacing={2}
+          noValidate
+          onSubmit={handleFormSubmit}
+          aria-labelledby={ID.heading}
+          aria-describedby={ID.rateNote}
+          aria-busy={isTxBusy || isSwitchingChain}
+        >
           {/* Header */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h5" fontWeight={700}>
-              {mode === 'wrap' ? 'Wrap' : 'Unwrap'}
+            <Typography id={ID.heading} component="h1" variant="h5" fontWeight={700}>
+              {intl.formatMessage({ id: mode === 'wrap' ? 'wrap.title.wrap' : 'wrap.title.unwrap' })}
             </Typography>
 
             <FormControl size="small" sx={{ minWidth: 142 }}>
-              <Select value={selectedChainId} onChange={handleNetworkChange} disabled={isSwitchingChain}>
+              <Select
+                value={selectedChainId}
+                onChange={handleNetworkChange}
+                disabled={isSwitchingChain}
+                inputProps={{ 'aria-label': intl.formatMessage({ id: 'wrap.network.aria' }) }}
+              >
                 {wrappedNativeChains.map((chain) => (
                   <MenuItem key={chain.chainId} value={chain.chainId}>
                     {chain.chainName}
@@ -285,12 +374,16 @@ export default function WrapPage() {
           </Box>
 
           {isConnected && !walletChainSupported && (
-            <Alert severity="warning">This wallet network is not supported. Pick a supported network above.</Alert>
+            <Alert severity="warning" id={ID.networkWarning}>
+              {intl.formatMessage({ id: 'wrap.network.unsupported' })}
+            </Alert>
           )}
 
           {/* From panel */}
           <Stack
             spacing={1}
+            role="group"
+            aria-labelledby={`${ID.fromLabel} ${ID.fromSymbol}`}
             sx={{
               borderRadius: 3,
               p: 1.75,
@@ -298,22 +391,34 @@ export default function WrapPage() {
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                From
+              <Typography id={ID.fromLabel} variant="body2" color="text.secondary">
+                {intl.formatMessage({ id: 'wrap.direction.from' })}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Balance: {isConnected ? formatBalance(fromBalance) : '-'} {fromSymbol}
+              <Typography id={ID.fromBalance} variant="body2" color="text.secondary">
+                {intl.formatMessage(
+                  { id: 'wrap.balance' },
+                  { value: isConnected ? formatBalance(fromBalance) : '-', symbol: fromSymbol }
+                )}
               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1.5 }}>
               <CustomInput
                 fullWidth
+                id="wrap-amount"
                 value={amount}
                 onChange={handleAmountChange}
                 disabled={!isConnected || isTxBusy}
                 placeholder="0"
-                inputProps={{ inputMode: 'decimal' }}
+                inputProps={{
+                  inputMode: 'decimal',
+                  'aria-label': intl.formatMessage(
+                    { id: mode === 'wrap' ? 'wrap.amount.aria.wrap' : 'wrap.amount.aria.unwrap' },
+                    { symbol: fromSymbol }
+                  ),
+                  'aria-describedby': ID.fromBalance,
+                  'aria-invalid': hasInsufficientBalance
+                }}
                 sx={{
                   '& .MuiInputBase-root': { fontSize: '2.25rem' },
                   '& .MuiInputBase-input::placeholder': { fontSize: '2.25rem' }
@@ -324,7 +429,7 @@ export default function WrapPage() {
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <TokenIcon symbol={fromSymbol} avatarProps={{ sx: { width: 34, height: 34 } }} />
-                    <Typography variant="h4" sx={{ minWidth: 52 }}>
+                    <Typography id={ID.fromSymbol} component="div" variant="h4" sx={{ minWidth: 52 }}>
                       {fromSymbol}
                     </Typography>
                   </Stack>
@@ -334,9 +439,10 @@ export default function WrapPage() {
                   size="small"
                   onClick={handleMax}
                   disabled={!isConnected || fromBalance === undefined || isTxBusy}
+                  aria-label={intl.formatMessage({ id: 'wrap.max.aria' }, { symbol: fromSymbol })}
                   sx={{ minWidth: 0, px: 0.5, py: 0, fontSize: '0.75rem', fontWeight: 700, lineHeight: 1.5 }}
                 >
-                  Max
+                  {intl.formatMessage({ id: 'wrap.max' })}
                 </Button>
               </Box>
             </Box>
@@ -346,6 +452,10 @@ export default function WrapPage() {
             <IconButton
               onClick={handleSwap}
               disabled={isTxBusy}
+              aria-label={intl.formatMessage(
+                { id: mode === 'wrap' ? 'wrap.swap.toUnwrap.aria' : 'wrap.swap.toWrap.aria' },
+                { native: selectedChain.nativeSymbol, wrapped: selectedChain.wrappedSymbol }
+              )}
               sx={{
                 width: 40,
                 height: 40,
@@ -366,6 +476,8 @@ export default function WrapPage() {
           {/* To panel */}
           <Stack
             spacing={1}
+            role="group"
+            aria-labelledby={`${ID.toLabel} ${ID.toSymbol}`}
             sx={{
               borderRadius: 3,
               p: 1.75,
@@ -373,16 +485,17 @@ export default function WrapPage() {
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                To
+              <Typography id={ID.toLabel} variant="body2" color="text.secondary">
+                {intl.formatMessage({ id: 'wrap.direction.to' })}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Balance: {isConnected ? formatBalance(toBalance) : '-'} {toSymbol}
+              <Typography id={ID.toBalance} variant="body2" color="text.secondary">
+                {intl.formatMessage({ id: 'wrap.balance' }, { value: isConnected ? formatBalance(toBalance) : '-', symbol: toSymbol })}
               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, pt: 1, alignItems: 'center' }}>
               <Typography
+                component="div"
                 variant="h2"
                 sx={{
                   fontWeight: 500,
@@ -397,7 +510,7 @@ export default function WrapPage() {
               </Typography>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
                 <TokenIcon symbol={toSymbol} avatarProps={{ sx: { width: 34, height: 34 } }} />
-                <Typography variant="h4" sx={{ minWidth: 52 }}>
+                <Typography id={ID.toSymbol} component="div" variant="h4" sx={{ minWidth: 52 }}>
                   {toSymbol}
                 </Typography>
               </Stack>
@@ -407,12 +520,16 @@ export default function WrapPage() {
           </Stack>
 
           {txState === 'submitted' && (
-            <Alert severity="info" icon={<CircularProgress size={18} />}>
-              Transaction submitted. Waiting for confirmation.
+            <Alert severity="info" role="status" id={ID.txStatus} icon={<CircularProgress size={18} aria-hidden="true" />}>
+              {intl.formatMessage({ id: 'tx.submitted' })}
             </Alert>
           )}
 
-          {txState === 'error' && <Alert severity="error">{parseError(txError, 'Transaction failed')}</Alert>}
+          {txState === 'error' && (
+            <Alert severity="error" id={ID.txError}>
+              {parseError(txError, intl.formatMessage({ id: 'tx.failed' }))}
+            </Alert>
+          )}
 
           <ConnectButton.Custom>
             {({ openConnectModal, mounted }) => {
@@ -420,11 +537,15 @@ export default function WrapPage() {
 
               return (
                 <Button
+                  type="button"
                   variant="contained"
                   size="large"
                   fullWidth
                   disabled={!ready || isActionDisabled}
                   onClick={isConnected ? handleSubmit : openConnectModal}
+                  aria-label={actionAriaLabel}
+                  aria-describedby={actionDescribedBy}
+                  aria-busy={isTxBusy || isSwitchingChain}
                   sx={{ height: 56, borderRadius: 3, fontSize: 17, fontWeight: 800 }}
                 >
                   {actionLabel}
@@ -433,8 +554,15 @@ export default function WrapPage() {
             }}
           </ConnectButton.Custom>
 
-          <Typography variant="caption" color="text.secondary" textAlign="center">
-            {selectedChain.nativeSymbol} wraps 1:1 into {selectedChain.wrappedSymbol} on {selectedChain.chainName}.
+          <Typography id={ID.rateNote} variant="caption" color="text.secondary" textAlign="center">
+            {intl.formatMessage(
+              { id: 'wrap.rateNote' },
+              {
+                native: selectedChain.nativeSymbol,
+                wrapped: selectedChain.wrappedSymbol,
+                chain: selectedChain.chainName
+              }
+            )}
           </Typography>
         </Stack>
       </Paper>

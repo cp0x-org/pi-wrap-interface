@@ -14,7 +14,9 @@ interface MainStyleProps {
 
 // ==============================|| MAIN LAYOUT - STYLED ||============================== //
 
-const MainContentStyled = styled('main', {
+// Renders a plain <div>: the <main> landmark lives on the inner Container so that
+// the <footer> below stays outside <main> and is exposed as a contentinfo landmark.
+const MainContentStyled = styled('div', {
   shouldForwardProp: (prop) => prop !== 'open' && prop !== 'menuOrientation' && prop !== 'borderRadius' && prop !== 'marginTop'
 })<MainStyleProps>(({ theme, open, menuOrientation, borderRadius, marginTop }) => ({
   backgroundColor: theme.palette.mode === ThemeMode.DARK ? theme.palette.dark[800] : theme.palette.grey[100],
