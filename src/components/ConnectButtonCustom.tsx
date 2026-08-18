@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -19,19 +20,12 @@ interface ConnectButtonCustomProps {
   label?: string;
 }
 
-const ConnectButtonCustom = ({ 
-  showBalance = false, 
-  chainStatus = 'icon',
-  accountStatus = 'full',
-  label = 'Connect Wallet'
-}: ConnectButtonCustomProps) => {
+const ConnectButtonCustom = ({ showBalance = false, chainStatus = 'icon', accountStatus = 'full', label }: ConnectButtonCustomProps) => {
+  const intl = useIntl();
+
   return (
     <StyledConnectButtonWrapper>
-      <ConnectButton 
-        chainStatus={chainStatus}
-        showBalance={showBalance}
-        label={label}
-      />
+      <ConnectButton chainStatus={chainStatus} showBalance={showBalance} label={label ?? intl.formatMessage({ id: 'wallet.connect' })} />
     </StyledConnectButtonWrapper>
   );
 };

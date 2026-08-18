@@ -17,6 +17,9 @@ export const TokenIcon: React.FC<TokenIconProps> = ({ symbol, avatarProps, ...bo
 
   return (
     <Box
+      // Декоративная иконка: символ токена всегда продублирован текстом рядом,
+      // поэтому скрываем её из AX tree, чтобы не дублировать имя.
+      aria-hidden="true"
       sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
       {...boxProps} // применяем пропсы Box
     >

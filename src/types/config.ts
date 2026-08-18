@@ -3,7 +3,7 @@ import { MenuOrientation, ThemeDirection, ThemeMode } from 'config';
 
 export type FontFamily = `'Inter', sans-serif` | `'Poppins', sans-serif` | `'Roboto', sans-serif`;
 export type PresetColor = 'default' | 'theme1' | 'theme2' | 'theme3' | 'theme4' | 'theme5' | 'theme6' | 'cp0x';
-export type I18n = 'en' | 'fr' | 'ro' | 'zh'; // 'en' - English, 'fr' - French, 'ro' - Romanian, 'zh' - Chinese
+export type I18n = 'en' | 'zh'; // 'en' - English, 'zh' - Chinese (Simplified)
 
 export type ConfigProps = {
   /**
@@ -67,12 +67,10 @@ export type ConfigProps = {
   presetColor: PresetColor;
 
   /**
-   * The props used for display menu-items with multi-language.
-   * We provide static below languages according to 'react-intl' options - https://www.npmjs.com/package/react-intl
-   * 'en' (default)
-   * 'fr'
-   * 'ro'
-   * 'zh'
+   * The props used for displaying the interface with multi-language support.
+   * We provide the below languages according to 'react-intl' options - https://www.npmjs.com/package/react-intl
+   * 'en' (default) - English
+   * 'zh' - Chinese (Simplified)
    */
   i18n: I18n;
 

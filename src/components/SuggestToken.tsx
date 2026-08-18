@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useIntl } from 'react-intl';
 import { Box, Button, CircularProgress, Paper, TextField, Typography } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -6,6 +7,7 @@ type Status = 'idle' | 'submitting' | 'success' | 'error';
 
 export function SuggestToken() {
   const theme = useTheme();
+  const intl = useIntl();
   const [token, setToken] = useState('');
   const [status, setStatus] = useState<Status>('idle');
 
@@ -38,7 +40,7 @@ export function SuggestToken() {
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 460, mt: 5, mb: 4 }}>
+    <Box component="section" aria-labelledby="suggest-token-heading" sx={{ width: '100%', maxWidth: 460, mt: 5, mb: 4 }}>
       <Paper
         elevation={0}
         sx={{
@@ -48,22 +50,28 @@ export function SuggestToken() {
           bgcolor: alpha(theme.palette.background.paper, 0.96)
         }}
       >
-        <Typography variant="h5" fontWeight={700} mb={0.75}>
-          Don't see your token?
+        <Typography id="suggest-token-heading" component="h2" variant="h5" fontWeight={700} mb={0.75}>
+          {intl.formatMessage({ id: 'suggest.title' })}
         </Typography>
-        <Typography variant="body2" color="text.secondary" mb={2.5}>
-          Let us know which token or chain you'd like us to add — we review all suggestions.
+        <Typography id="suggest-token-description" variant="body2" color="text.secondary" mb={2.5}>
+          {intl.formatMessage({ id: 'suggest.description' })}
         </Typography>
 
-        <Box component="form" onSubmit={handleSubmit}>
+        <Box component="form" onSubmit={handleSubmit} aria-busy={status === 'submitting'}>
           <TextField
             fullWidth
+            id="suggest-token-input"
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            placeholder="e.g. WBTC on Base or 0x123..."
+            placeholder={intl.formatMessage({ id: 'suggest.input.placeholder' })}
             required
             disabled={status === 'submitting'}
             size="small"
+            inputProps={{
+              'aria-label': intl.formatMessage({ id: 'suggest.input.aria' }),
+              'aria-describedby': 'suggest-token-description',
+              'aria-invalid': status === 'error'
+            }}
             sx={{ mb: 2 }}
           />
 
@@ -72,19 +80,20 @@ export function SuggestToken() {
               type="submit"
               variant="outlined"
               disabled={status === 'submitting' || !token.trim()}
-              startIcon={status === 'submitting' ? <CircularProgress size={14} color="inherit" /> : undefined}
+              aria-label={intl.formatMessage({ id: status === 'submitting' ? 'suggest.sending.aria' : 'suggest.submit.aria' })}
+              startIcon={status === 'submitting' ? <CircularProgress size={14} color="inherit" aria-hidden="true" /> : undefined}
             >
-              {status === 'submitting' ? 'Sending...' : 'Submit'}
+              {intl.formatMessage({ id: status === 'submitting' ? 'suggest.sending' : 'suggest.submit' })}
             </Button>
 
             {status === 'success' && (
-              <Typography variant="body2" color="success.main">
-                Sent! We'll review it soon.
+              <Typography role="status" variant="body2" color="success.main">
+                {intl.formatMessage({ id: 'suggest.success' })}
               </Typography>
             )}
             {status === 'error' && (
-              <Typography variant="body2" color="error.main">
-                Something went wrong, try again.
+              <Typography role="alert" variant="body2" color="error.main">
+                {intl.formatMessage({ id: 'suggest.error' })}
               </Typography>
             )}
           </Box>

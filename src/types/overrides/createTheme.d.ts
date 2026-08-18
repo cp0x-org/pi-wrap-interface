@@ -1,9 +1,12 @@
 import '@mui/material/styles';
-import { customShadows } from 'themes/shadows';
+// `themes/shadows` only has a default export (the customShadows factory), so the old
+// `import { customShadows }` resolved to nothing — masked by `skipLibCheck: true`.
+// CustomShadowProps is the actual shape that factory returns.
+import { CustomShadowProps } from 'types/default-theme';
 
 declare module '@mui/material/styles' {
   export interface ThemeOptions {
-    customShadows?: customShadows;
+    customShadows?: CustomShadowProps;
     customization?: TypographyOptions | ((palette: Palette) => TypographyOptions);
     darkTextSecondary?: string;
     textDark?: string;
@@ -11,7 +14,7 @@ declare module '@mui/material/styles' {
     grey500?: string;
   }
   interface Theme {
-    customShadows: customShadows;
+    customShadows: CustomShadowProps;
     customization: Typography;
     darkTextSecondary: string;
     textDark: string;
